@@ -20,8 +20,8 @@ class BillingImpl : Billing {
                     when {
                         it.user == user ->
                             userBalance = it.calculate(userBalance)
-                        it is P2P && it.userTo==user ->
-                            userBalance = it.sum+userBalance
+                        it is P2P && it.userTo == user ->
+                            userBalance = it.sum + userBalance
 
                     }
                 }

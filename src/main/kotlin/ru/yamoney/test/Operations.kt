@@ -27,18 +27,10 @@ data class Payment(
     }
 }
 
-data class WithDraw(
-        override val sum: BigDecimal,
-        override val user: String
-) : Operation {
-    override fun calculate(oldBalance: BigDecimal): BigDecimal {
-        return oldBalance - sum
-    }
-}
 
 data class P2P(override val sum: BigDecimal,
                override val user: String,
-               val userTo:String
+               val userTo: String
 
 ) : Operation {
 
