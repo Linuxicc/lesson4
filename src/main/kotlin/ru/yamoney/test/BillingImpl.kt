@@ -14,19 +14,15 @@ class BillingImpl : Billing {
 
     override fun getUserBalance(user: String) {
         var userBalance = BigDecimal.ZERO
-        file.readLines()
-                .map { it.toOperation() }
-                .forEach {
-                    when {
-                        it.user == user ->
-                            userBalance = it.calculate(userBalance)
-                        it is P2P && it.userTo == user ->
-                            userBalance = it.sum + userBalance
-
-                    }
-                }
+        file.bufferedReader().lineSequence().map { it.toOperation() }.forEach {
+            when {
+                it.user == user ->
+                    userBalance = it.calculate(userBalance)
+                it is P2P && it.userTo == user ->
+                    userBalance = it.sum + userBalance
+            }
+        }
         println(userBalance)
-
     }
 
     override fun getShopIdOperations(shopId: String) {

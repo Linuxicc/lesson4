@@ -33,7 +33,6 @@ data class P2P(override val sum: BigDecimal,
                val userTo: String
 
 ) : Operation {
-
     override fun calculate(oldBalance: BigDecimal): BigDecimal {
         return oldBalance - sum
     }
