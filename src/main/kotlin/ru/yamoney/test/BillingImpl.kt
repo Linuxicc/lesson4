@@ -13,12 +13,17 @@ class BillingImpl : Billing {
     }
 
     override fun getUserBalance(user: String) {
-        var userBalance=BigDecimal.ZERO
+        var userBalance = BigDecimal.ZERO
         file.readLines()
-                .map{it.toOperation()}
-                .filter { it.user==user }
+                .map { it.toOperation() }
                 .forEach {
-                    userBalance=it.calculate(userBalance)
+                    when {
+                        it.user == user ->
+                            userBalance = it.calculate(userBalance)
+                        it is P2P && it.userTo==user ->
+                            userBalance = it.sum+userBalance
+
+                    }
                 }
         println(userBalance)
 

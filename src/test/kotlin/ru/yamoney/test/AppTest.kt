@@ -24,9 +24,10 @@ class AppTest {
     fun shopInfo() {
         main(arrayOf("shop_info", "4454"))
     }
+
     @Test
-    fun p2p(){
-        main(arrayOf("p2p","Вася", "23","Петя"))
+    fun p2p() {
+        main(arrayOf("p2p", "240", "Вася", "Петя"))
     }
 
 }
