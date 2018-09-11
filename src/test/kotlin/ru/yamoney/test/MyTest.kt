@@ -8,15 +8,17 @@ import org.junit.jupiter.api.assertAll
 import java.io.File
 import java.io.PrintStream
 import java.io.ByteArrayOutputStream
+import java.math.BigDecimal
 
 
-val SUM = 123.toBigDecimal()
-val USERNAME = "Olga"
-val USERNAME_TO = "Ivan"
-val SHOP_ID = "85351"
-val depositLine = "ru.yamoney.test.Deposit||{\"sum\":%s,\"user\":\"%s\"}"
-val paymentLine = "ru.yamoney.test.Payment||{\"sum\":%s,\"user\":\"%s\",\"shopid\":\"%s\"}"
-val p2pLine = "ru.yamoney.test.P2P||{\"sum\":%s,\"user\":\"%s\",\"userTo\":\"%s\"}"
+private val SUM: BigDecimal = 123.toBigDecimal()
+private val SUM_P2P = 10.toBigDecimal()
+private const val USERNAME = "Olga"
+private const val USERNAME_TO = "Ivan"
+private const val SHOP_ID = "85351"
+private const val depositLine = "ru.yamoney.test.Deposit||{\"sum\":%s,\"user\":\"%s\"}"
+private const val paymentLine = "ru.yamoney.test.Payment||{\"sum\":%s,\"user\":\"%s\",\"shopid\":\"%s\"}"
+private const val p2pLine = "ru.yamoney.test.P2P||{\"sum\":%s,\"user\":\"%s\",\"userTo\":\"%s\"}"
 
 class MyTest {
     private val file = File("operations")
@@ -60,12 +62,12 @@ class MyTest {
     @DisplayName("Проверка записи операции P2P в файл")
     @Test
     fun addOperationP2PTest() {
-        val p2p = P2P(sum = SUM, user = USERNAME, userTo = USERNAME_TO)
+        val p2p = P2P(sum = SUM_P2P, user = USERNAME, userTo = USERNAME_TO)
         billing.addOperation(p2p)
         val strFromFile = file.readLines()
         assertAll("Проверяем, что в файл записалась нужная строка", {
             strFromFile.count().should.be.equal(1)
-            strFromFile.first().should.contain(p2pLine.format(SUM, USERNAME, USERNAME_TO))
+            strFromFile.first().should.contain(p2pLine.format(SUM_P2P, USERNAME, USERNAME_TO))
         })
     }
 
@@ -73,17 +75,38 @@ class MyTest {
     @Test
     fun checkUserBalanceAfterPayment() {
         file.appendText(paymentLine.format(SUM, USERNAME, SHOP_ID))
+        val balance = getBalanceFromConsole(USERNAME)
 
+        balance.should.equal("-$SUM")
+    }
+
+    @DisplayName("Проверяем, что баланс одного пользователя увеличивается, а другого уменьшается при P2P")
+    @Test
+    fun checkUserBalanceAfterPaymentDepositP2P() {
+        file.appendText(p2pLine.format(SUM_P2P, USERNAME, USERNAME_TO) + "\n")
+        val balanceUser1 = getBalanceFromConsole(USERNAME)
+        val balanceUser2 = getBalanceFromConsole(USERNAME_TO)
+
+        assertAll("Проверяем, что у первого пользователя сумма уменьшилась , а у второго увеличилась", {
+            balanceUser1.should.be.equal("-$SUM_P2P")
+            balanceUser2.should.be.equal(SUM_P2P.toString())
+        })
+    }
+
+    //метод для считывания с консоли
+    @Synchronized()
+    private fun readconsole(action: () -> Unit): String {
         val baos = ByteArrayOutputStream()
         val ps = PrintStream(baos)
         val old = System.out
         System.setOut(ps)
-        billing.getUserBalance(USERNAME)
+        action()
         System.out.flush()
         System.setOut(old)
-        val balance = baos.toString().trim()
-        
-        balance.should.equal("-$SUM")
+        return baos.toString().trim()
     }
+
+    private fun getBalanceFromConsole(username: String): String =
+            readconsole({ billing.getUserBalance(username) })
 
 }
