@@ -80,7 +80,7 @@ class MyTest {
         balance.should.equal("-$SUM")
     }
 
-    @DisplayName("Проверяем, что баланс одного пользователя увеличивается, а другого уменьшается при P2P")
+    @DisplayName("Проверяем изменение баланса пользователей при P2P")
     @Test
     fun checkUserBalanceAfterPaymentDepositP2P() {
         file.appendText(p2pLine.format(SUM_P2P, USERNAME, USERNAME_TO) + "\n")
