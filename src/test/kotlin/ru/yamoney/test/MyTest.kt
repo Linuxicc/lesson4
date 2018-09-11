@@ -6,6 +6,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertAll
 import java.io.File
+import java.io.PrintStream
+import java.io.ByteArrayOutputStream
+
 
 val SUM = 123.toBigDecimal()
 val USERNAME = "Olga"
@@ -66,5 +69,21 @@ class MyTest {
         })
     }
 
+    @DisplayName("Проверяем, что баланс уменьшается, если выполнена операция Payment")
+    @Test
+    fun checkUserBalanceAfterPayment() {
+        file.appendText(paymentLine.format(SUM, USERNAME, SHOP_ID))
+
+        val baos = ByteArrayOutputStream()
+        val ps = PrintStream(baos)
+        val old = System.out
+        System.setOut(ps)
+        billing.getUserBalance(USERNAME)
+        System.out.flush()
+        System.setOut(old)
+        val balance = baos.toString().trim()
+        
+        balance.should.equal("-$SUM")
+    }
 
 }
